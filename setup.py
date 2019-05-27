@@ -1,8 +1,8 @@
 from distutils.core import setup
 
-setup(name='wikia',
+setup(name='python-wikia',
       version='1.0.0',
-      description='wikia (fandom.com) API v1 wrapper',
+      description='Object oriented wikia (fandom.com) API v1 wrapper',
       long_description='A Wrapper for fandom.com\'s API.',
       author='sl4v',
       author_email='iamsl4v@protonmail.com',

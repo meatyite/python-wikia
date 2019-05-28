@@ -27,6 +27,11 @@ class DefaultNamespaces:
     ForumTalk = 111
 
 
+class GetActivityBy(Enum):
+    LatestActivity = "/Activity/LatestActivity"
+    RecentlyChangedArticles = "/Activity/RecentlyChangedArticles"
+
+
 class GetArticlesBy(Enum):
     Abc_order = "/Articles/List"
     New = "/Articles/New"
@@ -34,14 +39,77 @@ class GetArticlesBy(Enum):
     Top = "/Articles/Top"
 
 
+class Activity:
+
+    def __init__(self, originWiki=None, articleid=0, userid=0, revisionId=3401438, timestamp=1558477400):
+        self.originWiki = originWiki
+        self.articleid = articleid
+        self.userid = userid
+        self.revisionId = revisionId
+        self.timestamp = timestamp
+
+    def User(self):
+        return User.GetFromId(self.originWiki, self.userid)
+
+    def Article(self):
+        return Article.GetFromId(self.originWiki, self.articleid)
+
+
+class User:
+
+    def __init__(self, originWiki=None, userid=0, title="", name="", url="", numberofedits=0, avatar=""):
+        self.originWiki = originWiki
+        self.userid = userid
+        self.title = title
+        self.name = name
+        self.url = urljoin(originWiki.uri, url)
+        self.numberofedits = numberofedits
+        self.avatar = avatar
+
+    @staticmethod
+    def GetFromId(originWiki, ID):
+        userjson = requests.get(
+            originWiki.apiurl + '/User/Details',
+            params={
+                'ids': str(ID)
+            }
+        ).content.decode()
+        userjson = json.loads(userjson)['items']
+        return User(
+            userid=userjson['user_id'],
+            title=userjson['title'],
+            name=userjson['name'],
+            url=userjson['url'],
+            numberofedits=userjson['numberofedits'],
+            avatar=userjson['avatar']
+        )
+
+
 class Article:
 
-    def __init__(self, originwiki=None, ID=0, title="", url="", namespace=None):
-        self.originWiki = originwiki
+    def __init__(self, originWiki=None, ID=0, title="", url="", namespace=None):
+        self.originWiki = originWiki
         self.ID = ID
         self.title = title
-        self.url = urljoin(originwiki.uri, url)
+        self.url = urljoin(originWiki.uri, url)
         self.namespace = namespace
+
+    @staticmethod
+    def GetFromId(originWiki, ID):
+        articlejson = requests.get(
+            originWiki.apiurl + '/Articles/Details',
+            params={
+                'ids': str(ID)
+            }
+        ).content.decode()
+        articlejson = json.loads(articlejson)['items'][str(ID)]
+        return Article(
+            originWiki=originWiki,
+            ID=articlejson['id'],
+            title=articlejson['title'],
+            url=articlejson['url'],
+            namespace=articlejson['ns']
+        )
 
     def GetRelated(self, limit=3):
         related_articles = []
@@ -58,7 +126,7 @@ class Article:
         for article_data in article_json:
             related_articles.append(
                 Article(
-                    originwiki=self.originWiki,
+                    originWiki=self.originWiki,
                     ID=article_data['id'],
                     url=article_data['url'],
                     title=article_data['title']
@@ -118,6 +186,29 @@ class Wiki:
         self.uri = "https://" + domain + '/'
         self.apiurl = self.uri + "/api/v1/"
 
+    def GetActivity(self, by=GetActivityBy.LatestActivity, limit=10, allowduplicates=False):
+        activity = []
+
+        activity_json = requests.get(
+            by.value,
+            params={
+                'limit': str(limit),
+                'allowDuplicates': str(allowduplicates).lower()
+            }
+        ).content.decode()
+        activity_json = json.loads(activity_json)['items']
+        for activity_data in activity_json:
+            activity.append(
+                Activity(
+                    originWiki=self,
+                    articleid=activity_data['article'],
+                    userid=activity_data['user'],
+                    revisionId=activity_data['revisionId'],
+                    timestamp=activity_data['timestamp']
+                )
+            )
+        return activity
+
     def GetArticles(self, by=GetArticlesBy.Abc_order, namespace=None, category="", limit=10, baseArticleId=None):
         articles = []
 
@@ -131,7 +222,7 @@ class Wiki:
         for articledata in articledatalist:
             articles.append(
                 Article(
-                    originwiki=self,
+                    originWiki=self,
                     ID=articledata['id'],
                     title=articledata['title'],
                     url=articledata['url'],

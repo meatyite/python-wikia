@@ -85,6 +85,15 @@ class User:
             avatar=userjson['avatar']
         )
 
+    @staticmethod
+    def GetFromIds(originWiki, IDs=[]):
+        users = []
+
+        for ID in IDs:
+            users.append(User.GetFromId(originWiki, ID))
+
+        return users
+
 
 class Article:
 
@@ -111,6 +120,14 @@ class Article:
             url=articlejson['url'],
             namespace=articlejson['ns']
         )
+
+    @staticmethod
+    def GetFromIds(originWiki, IDs):
+        articles = []
+
+        for ID in IDs:
+            articles.append(Article.GetFromId(originWiki, ID))
+        return articles
 
     def GetRelated(self, limit=3):
         related_articles = []
@@ -234,13 +251,12 @@ class Wiki:
 
     def GetStats(self):
         stats_json = requests.get(
-            self.apiurl + "/Wikis/Details",
+            "https://community.fandom.com/api/v1//Wikis/Details",
             params={
                 'ids': str(self.ID)
             }
         ).content.decode()
-
-        stats_data = json.loads(stats_json)['items'][str(self.ID)]
+        stats_data = json.loads(stats_json)['items'][str(self.ID)]['stats']
         return WikiStats(
             edits=stats_data['edits'],
             articles=stats_data['articles'],

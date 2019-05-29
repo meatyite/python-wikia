@@ -74,8 +74,9 @@ class User:
                 'ids': str(ID)
             }
         ).content.decode()
-        userjson = json.loads(userjson)['items']
+        userjson = json.loads(userjson)['items'][0]
         return User(
+            originWiki=originWiki,
             userid=userjson['user_id'],
             title=userjson['title'],
             name=userjson['name'],

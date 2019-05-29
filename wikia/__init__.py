@@ -190,7 +190,7 @@ class Wiki:
         activity = []
 
         activity_json = requests.get(
-            by.value,
+            self.apiurl + by.value,
             params={
                 'limit': str(limit),
                 'allowDuplicates': str(allowduplicates).lower()

@@ -4,9 +4,6 @@ import json
 from enum import Enum
 
 
-# TODO: make all the function names PEP8 complaint (lower case words with underscores separating them)
-
-
 class DefaultNamespaces:
     Media = -2,
     Special = -1,
@@ -31,15 +28,15 @@ class DefaultNamespaces:
 
 
 class GetActivityBy(Enum):
-    LatestActivity = "/Activity/LatestActivity"
-    RecentlyChangedArticles = "/Activity/RecentlyChangedArticles"
+    latest_activity = "/Activity/LatestActivity"
+    recently_changed = "/Activity/RecentlyChangedArticles"
 
 
 class GetArticlesBy(Enum):
-    Abc_order = "/Articles/List"
-    New = "/Articles/New"
-    Popular = "/Articles/Popular"
-    Top = "/Articles/Top"
+    abc_order = "/Articles/List"
+    new = "/Articles/New"
+    popular = "/Articles/Popular"
+    top = "/Articles/Top"
 
 
 class Activity:
@@ -51,11 +48,11 @@ class Activity:
         self.revisionId = revisionId
         self.timestamp = timestamp
 
-    def User(self):
-        return User.GetFromId(self.originWiki, self.userid)
+    def get_user(self):
+        return User.get_from_id(self.originWiki, self.userid)
 
-    def Article(self):
-        return Article.GetFromId(self.originWiki, self.articleid)
+    def get_article(self):
+        return Article.get_from_id(self.originWiki, self.articleid)
 
 
 class User:
@@ -70,7 +67,7 @@ class User:
         self.avatar = avatar
 
     @staticmethod
-    def GetFromId(originWiki, ID):
+    def get_from_id(originWiki, ID):
         userjson = requests.get(
             originWiki.apiurl + '/User/Details',
             params={
@@ -89,11 +86,11 @@ class User:
         )
 
     @staticmethod
-    def GetFromIds(originWiki, IDs=[]):
+    def get_from_ids(originWiki, IDs=[]):
         users = []
 
         for ID in IDs:
-            users.append(User.GetFromId(originWiki, ID))
+            users.append(User.get_from_id(originWiki, ID))
 
         return users
 
@@ -108,7 +105,7 @@ class Article:
         self.namespace = namespace
 
     @staticmethod
-    def GetFromId(originWiki, ID):
+    def get_from_id(originWiki, ID):
         articlejson = requests.get(
             originWiki.apiurl + '/Articles/Details',
             params={
@@ -125,14 +122,14 @@ class Article:
         )
 
     @staticmethod
-    def GetFromIds(originWiki, IDs):
+    def get_from_ids(originWiki, IDs):
         articles = []
 
         for ID in IDs:
-            articles.append(Article.GetFromId(originWiki, ID))
+            articles.append(Article.get_from_id(originWiki, ID))
         return articles
 
-    def GetRelated(self, limit=3):
+    def get_related(self, limit=3):
         related_articles = []
 
         article_json = requests.get(
@@ -154,7 +151,7 @@ class Article:
                 )
             )
 
-    def GetInfo(self):
+    def get_info(self):
         info_json = requests.get(
             self.originWiki.apiurl + '/Articles/Details',
             params={
@@ -207,7 +204,7 @@ class Wiki:
         self.uri = "https://" + domain + '/'
         self.apiurl = self.uri + "/api/v1/"
 
-    def GetActivity(self, by=GetActivityBy.LatestActivity, limit=10, allowduplicates=False):
+    def get_activity(self, by=GetActivityBy.latest_activity, limit=10, allowduplicates=False):
         activity = []
 
         activity_json = requests.get(
@@ -230,7 +227,7 @@ class Wiki:
             )
         return activity
 
-    def GetArticles(self, by=GetArticlesBy.Abc_order, namespace=None, category="", limit=10, baseArticleId=None):
+    def get_articles(self, by=GetArticlesBy.abc_order, namespace=None, category="", limit=10, baseArticleId=None):
         articles = []
 
         article_json = requests.get(
@@ -252,7 +249,7 @@ class Wiki:
             )
         return articles
 
-    def GetStats(self):
+    def get_stats(self):
         stats_json = requests.get(
             "https://community.fandom.com/api/v1//Wikis/Details",
             params={
@@ -273,7 +270,7 @@ class Wiki:
         )
 
     @staticmethod
-    def SearchWikis(name="", hub="", lang="en", limit=25, batch=1, include_domain=True):
+    def search_wikis(name="", hub="", lang="en", limit=25, batch=1, include_domain=True):
         wikis = []
 
         search_json = requests.get(

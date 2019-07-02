@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='python-wikia',
-      version='1.1.2',
+      version='1.1.3',
       description='Object oriented wikia (fandom.com) API v1 wrapper',
       long_description='An object oriented Wrapper for fandom.com\'s API.',
       author='sl4v',

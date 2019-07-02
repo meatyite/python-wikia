@@ -4,6 +4,9 @@ import json
 from enum import Enum
 
 
+# TODO: make all the function names PEP8 complaint (lower case words with underscores separating them)
+
+
 class DefaultNamespaces:
     Media = -2,
     Special = -1,
